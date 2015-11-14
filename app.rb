@@ -1,8 +1,10 @@
 require 'sinatra'
 require 'koala'
 
+set :bind, '0.0.0.0'
+
 get '/' do
-  # return the JavaScript Page
+  send_file('index.html')
 end
 
 post '/token' do
