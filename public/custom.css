@@ -1,0 +1,9 @@
+.narrow-input {
+  max-width: 75px;
+}
+
+.control-section {
+  margin-bottom: 15px;
+  padding-bottom: 5px;
+  border-bottom: 1px solid #eee;
+}

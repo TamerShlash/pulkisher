@@ -14,20 +14,21 @@ $(document).ready(function() {
     FB.getLoginStatus(statusChangeCallback);
   });
   $('#publish').click(doPublish);
-  $('#selectall').click(selectAll);
+  $('#toggle-all').click(toggleAll);
+  $('#select-range').click(selectRange);
 });
 
 // This is called with the results from from FB.getLoginStatus().
 function statusChangeCallback(response) {
-  console.log(response);
   $('#status').html("");
   $('#groups').html('');
   if (response.status === 'connected') {
+    displayUserName();
     listGroups();
   } else if (response.status === 'not_authorized') {
-    $('#status').html('Please log into this app.');
+    $('#status').html('Please log in to the app:');
   } else {
-    $('#status').html('Please log into Facebook.');
+    $('#status').html('Please log in to the app:');
   }
 };
 
@@ -36,20 +37,33 @@ function listGroups() {
     function(response) {
       groups = response.data;
       groupsList = $('#groups');
-      groups.forEach(function(group) {
-        groupsList.append(
-          '<li>' +
-            '<input type="checkbox" value="' + group.id + '"/>' +
-            '<img src="' + group.icon + '"/>' +
-            '<a target="_blank" href="https://www.facebook.com/groups/' + group.id + '/">' +
-              group.name +
-            '</a>' +
-          '</li>'
-        );
+      groups.forEach(function(group, index) {
+        groupsList.append(template(group, index));
       });
     }
   );
 };
+
+function displayUserName() {
+  FB.api('/me', function(response) {
+    $('#status').html('logged in as ' + response.name);
+  });
+}
+
+function template(group, index) {
+  return (
+    '<tr>' +
+      '<td>' + (index + 1) + '</td>' + 
+      '<td>' +
+        '<img src="' + group.icon + '"/> ' +
+        '<a target="_blank" href="https://www.facebook.com/groups/' + group.id + '/">' +
+          group.name +
+        '</a>' +
+      '</td>' +
+      '<td><input type="checkbox" value="' + group.id + '"/></td>' + 
+    '</tr>'
+  )
+}
 
 function doPublish() {
   ctype = $('[name=ctype]:checked').val();
@@ -82,7 +96,7 @@ function doPublish() {
 
 function schedule(edge, params) {
   interval = parseInt($('#interval').val());
-  $('#groups li :checked').each(function(index, group) {
+  $('#groups tr td :checked').each(function(index, group) {
     setTimeout(function() {
       FB.api('/' + group.value + '/' + edge,
           'POST',
@@ -100,8 +114,35 @@ function schedule(edge, params) {
     }, index * interval * 1000);
   });
 };
-function selectAll() {
-  $('#groups li input[type=checkbox]').each(function(index, elem) {
-    $(elem).prop('checked', true)
+
+function deselectAll() {
+  $('#groups tr td input[type=checkbox]').each(function(index, elem) {
+    $(elem).prop('checked', false);
   });
 }
+
+function toggleAll() {
+  $('#groups tr td input[type=checkbox]').each(function(index, elem) {
+    $(elem).prop('checked', !$(elem).prop('checked'));
+  });
+}
+
+function selectRange() {
+  deselectAll();
+  var startIndex = parseInt($('#startnumber').val()) - 1;
+  var endIndex = parseInt($('#endnumber').val()) - 1;
+  var groups = $('#groups tr td input[type=checkbox]');
+  for (var i = startIndex; i <= endIndex; i++) {
+    $(groups[i]).prop('checked', true);
+  }
+}
+
+
+
+
+
+
+
+
+
+
