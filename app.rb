@@ -1,10 +1,11 @@
 require 'sinatra'
 require 'koala'
 
-set :bind, '0.0.0.0'
+# set :bind, '0.0.0.0'
 
 get '/' do
-  send_file('index.html')
+  File.read(File.join('public', 'index.html'))
+  # send_file('index.html')
 end
 
 post '/token' do
